@@ -1,1 +1,2 @@
-# colemak-extensio-2
+# Colemak Popup Extension
+
