@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "Colemak Tab Cycler",
+  "version": "1.0",
+  "description": "Cycles through browser tabs using a Colemak keyboard layout popup.",
+  
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "Open Colemak Area",
+    "default_icon": "icons8-copy-16.png"
+  },
+
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Alt+M"
+      },
+      "description": "Open the popup with Alt+H"
+    }
+  },
+
+  "permissions": ["tabs", "storage", "clipboardWrite", "clipboardRead"],
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "content_security_policy": "script-src 'self' 'unsafe-inline'; object-src 'self'"
+}
