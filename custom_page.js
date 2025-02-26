@@ -22,15 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
         dvorakToColemakConversion(event);
     });
 
-    // Clear text when F8 is pressed
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "F8") {
-            textArea.value = "";  // Clear textarea
-            chrome.storage.local.set({ savedText: "", cursorPos: 0 }); // Clear saved state
-            console.log("Textarea cleared.");
-        }
-    });
-
     // Save text and cursor position on input
     textArea.addEventListener("input", () => {
         chrome.storage.local.set({ savedText: textArea.value });
@@ -48,6 +39,18 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // Add keyboard shortcuts for F8 (Clear) and F4 (Copy)
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "F8") {
+            textArea.value = ""; // Clear textarea
+            chrome.storage.local.set({ savedText: "", cursorPos: 0 }); // Clear saved state
+            displayMessage("Cleared all text!"); // Show status message
+        }
+        if (event.key === "F4") {
+            copyText();
+        }
+    });
+
     document.getElementById("saveButton").addEventListener("click", () => {
         const textContent = textArea.value;
         const blob = new Blob([textContent], { type: "text/plain" });
@@ -62,15 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
         textArea.focus();
     });
 
-    document.getElementById("copyButton").addEventListener("click", () => {
-        const start = textArea.selectionStart;
-        const end = textArea.selectionEnd;
-        textArea.select();
-        document.execCommand("copy");
-        textArea.setSelectionRange(start, end);
-        textArea.focus();
-        displayMessage("Content copied to clipboard");
-    });
+    document.getElementById("copyButton").addEventListener("click", copyText);
 
     // Listen for "Copy and Clear" button click to function identically to Shift+Enter
     const copyAndClearButton = document.getElementById("copyAndClearButton");
@@ -82,9 +77,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Function to copy text (for both button and F4 key)
+    function copyText() {
+        textArea.select();
+        document.execCommand("copy");
+        textArea.setSelectionRange(textArea.value.length, textArea.value.length); // Restore cursor
+        textArea.focus();
+        displayMessage("Content copied to clipboard");
+    }
+
     // Function to handle both Save and Close, and Copy and Clear
     function handleSaveAndClose() {
-        const textArea = document.getElementById("colemakTextArea");
         const text = textArea.value;
 
         // Focus the popup window before performing the clipboard operation
