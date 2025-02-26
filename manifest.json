@@ -13,9 +13,9 @@
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
-        "default": "Alt+M"
+        "default": "Ctrl+M"
       },
-      "description": "Open the popup with Alt+H"
+      "description": "Open the popup with Ctrl+M"
     }
   },
 
