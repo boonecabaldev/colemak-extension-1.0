@@ -22,6 +22,15 @@ document.addEventListener("DOMContentLoaded", () => {
         dvorakToColemakConversion(event);
     });
 
+    // Clear text when F8 is pressed
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "F8") {
+            textArea.value = "";  // Clear textarea
+            chrome.storage.local.set({ savedText: "", cursorPos: 0 }); // Clear saved state
+            console.log("Textarea cleared.");
+        }
+    });
+
     // Save text and cursor position on input
     textArea.addEventListener("input", () => {
         chrome.storage.local.set({ savedText: textArea.value });
