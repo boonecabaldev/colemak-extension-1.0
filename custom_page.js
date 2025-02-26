@@ -77,14 +77,24 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Function to copy text (for both button and F4 key)
-    function copyText() {
-        textArea.select();
-        document.execCommand("copy");
-        textArea.setSelectionRange(textArea.value.length, textArea.value.length); // Restore cursor
+function copyText() {
+    const textArea = document.getElementById("colemakTextArea");
+
+    // Save the current cursor position
+    const cursorPosition = textArea.selectionStart;
+
+    // Select and copy the text
+    textArea.select();
+    document.execCommand("copy");
+
+    // Restore the cursor position after a short delay
+    setTimeout(() => {
+        textArea.setSelectionRange(cursorPosition, cursorPosition);
         textArea.focus();
-        displayMessage("Content copied to clipboard");
-    }
+    }, 10);
+
+    displayMessage("Content copied to clipboard");
+}
 
     // Function to handle both Save and Close, and Copy and Clear
     function handleSaveAndClose() {
