@@ -39,15 +39,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Add keyboard shortcuts for F8 (Clear) and F4 (Copy)
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "F8") {
+    // Add keyboard shortcuts for F8 (Copy), F4 (Clear), and F9 (Paste)
+    document.addEventListener("keydown", async (event) => {
+        if (event.key === "F4") {
             textArea.value = ""; // Clear textarea
             chrome.storage.local.set({ savedText: "", cursorPos: 0 }); // Clear saved state
             displayMessage("Cleared all text!"); // Show status message
         }
-        if (event.key === "F4") {
+        if (event.key === "F8") {
             copyText();
+        }
+        if (event.key === "F9") {
+            event.preventDefault(); // Prevent default browser action
+            pasteText();
         }
     });
 
@@ -77,40 +81,63 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-function copyText() {
+    function copyText() {
+        const start = textArea.selectionStart;
+        const end = textArea.selectionEnd;
+        const selectedText = textArea.value.substring(start, end);
+        
+        let textToCopy;
+        let message;
+
+        if (selectedText.length > 0) {
+            textToCopy = selectedText;
+            message = "Selection copied to clipboard!";
+        } else {
+            textToCopy = textArea.value;
+            message = "Copied all text to clipboard!";
+        }
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            displayMessage(message);
+        }).catch(err => {
+            console.error("Clipboard error:", err);
+        });
+
+        setTimeout(() => {
+            if (selectedText.length > 0) {
+                textArea.setSelectionRange(start, end); // Keep selection
+            } else {
+                textArea.setSelectionRange(start, start); // Restore cursor
+            }
+            textArea.focus();
+        }, 10);
+    }
+
+async function pasteText() {
     const textArea = document.getElementById("colemakTextArea");
+    
+    try {
+        // Try using the Clipboard API (Requires user-initiated event & clipboardRead permission)
+        const clipboardText = await navigator.clipboard.readText();
+        insertTextAtCursor(textArea, clipboardText);
+    } catch (err) {
+        console.warn("Clipboard API failed, trying execCommand fallback...");
 
-    // Save the current cursor position
-    const cursorPosition = textArea.selectionStart;
-
-    // Select and copy the text
-    textArea.select();
-    document.execCommand("copy");
-
-    // Restore the cursor position after a short delay
-    setTimeout(() => {
-        textArea.setSelectionRange(cursorPosition, cursorPosition);
+        // Fallback method using execCommand (deprecated but works in some cases)
         textArea.focus();
-    }, 10);
-
-    displayMessage("Content copied to clipboard");
+        document.execCommand("paste");
+    }
 }
-
-    // Function to handle both Save and Close, and Copy and Clear
     function handleSaveAndClose() {
         const text = textArea.value;
-
-        // Focus the popup window before performing the clipboard operation
         window.focus(); // Make sure the popup is focused
 
-        // Ensure the clipboard operation is inside a user-initiated event
         try {
             navigator.clipboard.writeText(text)
                 .then(() => {
                     console.log("Text copied to clipboard!");
                     textArea.value = "";  // Clear the text area
                     chrome.storage.local.set({ savedText: "", cursorPos: 0 }); // Clear saved state
-                    // Close the popup
                     window.close();
                 })
                 .catch(err => {
@@ -121,7 +148,6 @@ function copyText() {
         }
     }
 
-    // Handle focus and pasting clipboard data when the popup closes
     window.onbeforeunload = () => {
         chrome.storage.local.set({
             savedText: textArea.value,
