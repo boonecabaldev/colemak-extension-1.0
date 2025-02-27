@@ -1,5 +1,13 @@
 # Colemak Popup Extension
 
+
+## Current Tasks
+
+- [ ] get new icon
+
+
+## Completed
+
 - [X] bug: when tab tab copy, it doesnt save the cursor position after copying
 - [X] F8 clear
 - [X] F5 or F6 copy
